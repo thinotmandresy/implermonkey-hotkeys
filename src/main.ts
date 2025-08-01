@@ -1,5 +1,6 @@
 import "./style.css";
+import registerHotkeys from "./hotkeys";
 
 (function main() {
-  console.log("Hello, World!");
+  registerHotkeys();
 })();
