@@ -1,9 +1,14 @@
 type Trigger = string | string[];
 type Action = (e: KeyboardEvent) => void;
 
+interface Binding {
+  action: Action;
+  allowInInput: boolean;
+}
+
 export default class HotkeyManager {
   private static _instance: HotkeyManager | null = null;
-  private bindings: Map<string, Action[]> = new Map<string, Action[]>();
+  private bindings: Map<string, Binding[]> = new Map<string, Binding[]>();
   private sequence: string[] = [];
   private sequenceTimeoutId: number | null = null;
   private sequenceTimeoutMs: number = 1000;
@@ -25,14 +30,15 @@ export default class HotkeyManager {
     this.sequenceTimeoutMs = ms;
   }
 
-  public bind(trigger: Trigger, action: Action): void {
+  public bind(trigger: Trigger, action: Action, options: { allowInInput?: boolean } = {}): void {
     const triggerKey = this.parseTriggerKey(trigger);
+    const binding: Binding = { action, allowInInput: options.allowInInput ?? false };
     if (this.bindings.has(triggerKey)) {
-      const actions = this.bindings.get(triggerKey) || [];
-      actions.push(action);
-      this.bindings.set(triggerKey, actions);
+      const bindings = this.bindings.get(triggerKey) || [];
+      bindings.push(binding);
+      this.bindings.set(triggerKey, bindings);
     } else {
-      this.bindings.set(triggerKey, [action]);
+      this.bindings.set(triggerKey, [binding]);
     }
   }
 
@@ -41,17 +47,17 @@ export default class HotkeyManager {
     if (!this.bindings.has(triggerKey)) {
       return;
     }
-    const actions = this.bindings.get(triggerKey);
-    if (!actions) {
+    const bindings = this.bindings.get(triggerKey);
+    if (!bindings) {
       return;
     }
 
-    const i = actions.indexOf(action);
+    const i = bindings.findIndex((b) => b.action === action);
     if (i !== -1) {
-      actions.splice(i, 1);
+      bindings.splice(i, 1);
     }
 
-    if (actions.length === 0) {
+    if (bindings.length === 0) {
       this.bindings.delete(triggerKey);
     }
   }
@@ -94,11 +100,20 @@ export default class HotkeyManager {
     }, this.sequenceTimeoutMs);
 
     const sequenceKey = this.sequence.join(">");
-    const actions =
+    const bindings = 
       this.bindings.get(sequenceKey) || this.bindings.get(currentKey);
 
-    if (actions) {
-      actions.forEach((action) => action(e));
+    if (bindings) {
+      const isInputElement =
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement ||
+        document.activeElement instanceof HTMLSelectElement;
+
+      bindings.forEach((binding) => {
+        if (!isInputElement || binding.allowInInput) {
+          binding.action(e);
+        }
+      });
       this.sequence = [];
       this.sequenceTimeoutId = null;
     }

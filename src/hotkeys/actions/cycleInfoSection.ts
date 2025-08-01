@@ -1,12 +1,4 @@
 export default function cycleInfoSection(_e: KeyboardEvent): void {
-  if (
-    document.activeElement instanceof HTMLInputElement ||
-    document.activeElement instanceof HTMLTextAreaElement ||
-    document.activeElement instanceof HTMLSelectElement
-  ) {
-    return;
-  }
-
   // Don't if currently in fullscreen gallery mode
   if (document.querySelector(".modal-close-btn img")) {
     return;
@@ -18,7 +10,7 @@ export default function cycleInfoSection(_e: KeyboardEvent): void {
     return;
   }
 
-  const activeTab = Array.from(tabBtns).find(btn => btn.classList.contains("active"));
+  const activeTab = Array.from(tabBtns).find((btn) => btn.classList.contains("active"));
   if (activeTab && activeTab.nextElementSibling) {
     (activeTab.nextElementSibling as HTMLButtonElement).click();
   } else {

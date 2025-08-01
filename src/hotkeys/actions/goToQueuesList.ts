@@ -1,12 +1,4 @@
 export default function goToQueuesList(_e: KeyboardEvent): void {
-  if (
-    document.activeElement instanceof HTMLInputElement ||
-    document.activeElement instanceof HTMLTextAreaElement ||
-    document.activeElement instanceof HTMLSelectElement
-  ) {
-    return;
-  }
-
   const url = window.location.href;
   const currentDomain = url.split("/")[4];
   if (!currentDomain) {

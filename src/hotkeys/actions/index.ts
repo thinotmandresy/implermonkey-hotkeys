@@ -5,5 +5,5 @@ import cycleInfoSection from "./cycleInfoSection";
 export default {
   goToQueuesList,
   goToQueue,
-  switchInfo: cycleInfoSection,
+  cycleInfoSection,
 };
